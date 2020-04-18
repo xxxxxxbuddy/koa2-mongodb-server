@@ -8,17 +8,33 @@ export default class UserHelper {
 
   /**
    * 查找所用用户
-   * @return {Promise<string | mongoose.Document[]>} res [description]
    */
   static async findAllUsers() {
-    const query = User.find({});
-    return await query.exec(function (err, users) {
-      if (err) {
-        return err.message;
-      } else {
-        return users;
-      }
-    });
+    const query = User.find();
+    return await query.exec(this.handleRes);
+  }
+
+  /**
+   * 检索用户信息
+   */
+  static async searchUsers(filter: mongoose.FilterQuery<any>) {
+    const query = User.find(filter);
+    return await query.exec(this.handleRes);
+  }
+
+  /**
+   * 增加用户
+   */
+  static async addUser(data: any) {
+    return await User.create(data);
+  }
+
+  static handleRes(err: mongoose.NativeError, data: mongoose.Document[]) {
+    if (err) {
+      return err.message;
+    } else {
+      return data;
+    }
   }
 }
 /**

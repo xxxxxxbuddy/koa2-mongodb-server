@@ -45,13 +45,13 @@ var walk = function(modelPath) {
 walk(models_path)
 
 require('babel-register')
-const Koa = require('koa')
-const logger = require('koa-logger')
-const session = require('koa-session')
-const bodyParser = require('koa-bodyparser')
+import * as Koa from 'koa';
+import * as logger from 'koa-logger';
+import * as session from 'koa-session';
+import * as bodyParser from 'koa-bodyparser';
 const app = new Koa()
 
-app.keys = ['zhangivon']
+app.keys = ['zhanglei']
 app.use(logger())
 app.use(session({
   maxAge: 3600000,  // session一小时过期

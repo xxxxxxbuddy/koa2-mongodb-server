@@ -1,18 +1,20 @@
-'use strict';
+// @ts-nocheck
 
-const Router = require('koa-router');
-const User = require('../src/controllers/user');
-const App = require('../src/controllers/app');
+import * as Router from 'koa-router';
+import * as User from '../src/controllers/user';
+import * as App from '../src/controllers/app';
 
 module.exports = function() {
   const router = new Router({
     prefix: '/api',
+    methods: ['get', 'post', 'put', 'delete'],
   });
 
   // user
   router.post('/user/signup', App.hasBody, User.signup);
-  router.post('/user/getinfo', App.hasBody, User.getUserInfo);
-  // router.post('/u/update', App.hasBody, App.hasToken, User.update)
+  router.get('/user/getinfo', App.hasBody, App.hasToken, User.getUserInfo);
+  router.put('/user/add', App.hasBody, App.hasToken, User.addUser);
+  router.post('/user/update', App.hasBody, App.hasToken, User.updateUser);
 
   // // DB Interface test
   // router.get('/test/user/users',User.users)

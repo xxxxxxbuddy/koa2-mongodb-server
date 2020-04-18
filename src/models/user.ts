@@ -2,7 +2,7 @@
 
 import { Next } from 'koa';
 
-const mongoose = require('mongoose');
+import * as mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 
@@ -20,22 +20,26 @@ const Schema = mongoose.Schema;
  * 除了定义结构外，还定义文档的实例方法，静态模型方法，复合索引，中间件等
  * @type {mongoose}
  */
-const UserSchema = new Schema({
+export const UserSchema = new Schema({
   name: String,
   id: {
+    required: true,
     unique: true,
     type: String,
   },
   sex: {
+    required: true,
     type: Number,
   },
-  phone: Number,
+  phone: {
+    required: true,
+    type: Number
+  },
   credit_rating: {
     default: 80,
     type: Number,
   },
   car_id: String,
-  accessToken: String,
   meta: {
     createAt: {
       type: Date,
@@ -51,9 +55,14 @@ const UserSchema = new Schema({
 // Defines a pre hook for the document.
 UserSchema.pre('save', function(next: Next) {
   if (this.isNew) {
-    this.meta.createAt = this.meta.updateAt = Date.now();
+    this.update({meta: {
+      createAt: Date.now(),
+      updateAt: Date.now(),
+    }});
   } else {
-    this.meta.updateAt = Date.now();
+    this.update({meta: {
+      updateAt: Date.now(),
+    }});
   }
   next();
 });

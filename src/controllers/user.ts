@@ -1,13 +1,14 @@
 'use strict';
 
 import { Context, Next } from 'koa';
-
-const xss = require('xss');
-const mongoose =  require('mongoose');
+import * as xss from 'xss';
+import * as mongoose from 'mongoose';
 const User = mongoose.model('User');
-const uuid = require('uuid');
+// const uuid = require('uuid');
 import UserHelper from '../dbhelper/userHelper';
 import { RESPONSE_TAG } from '../constant';
+import { handleErr } from '../utils/errorHeper';
+import { UserSchema } from '../models/user';
 
 // var userHelper = require('../dbhelper/userHelper')
 
@@ -68,9 +69,8 @@ export const signup = async (ctx: Context, next: Next) => {
  */
 export const getUserInfo = async (ctx: Context, next: Next) => {
   const query = ctx.query;
-  const filters = Object.keys(query);
 
-  if (filters.length === 0) {
+  if (Object.keys(query).length === 0) {
     // 查询所有用户信息
     const userInfo = await UserHelper.findAllUsers();
     if (typeof userInfo === 'string') {
@@ -85,47 +85,76 @@ export const getUserInfo = async (ctx: Context, next: Next) => {
       };
     }
   } else {
-    // 检索用户
-
+    const userInfo = await UserHelper.searchUsers(query);
+    if (typeof userInfo === 'string') {
+      ctx.body = {
+        code: 0,
+        errMsg: RESPONSE_TAG.ERROR + userInfo,
+      };
+    } else {
+      ctx.body = {
+        code: 1,
+        data: userInfo,
+      };
+    }
   }
 
   return next;
 };
 
 /**
- * 更新用户信息操作
- * @param  {[type]}   ctx  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
+ * 获取用户信息
+ *
  */
-// exports.update = async (ctx, next) => {
-//   var body = ctx.request.body
-//   var user = ctx.session.user
-//   var fields = 'avatar,gender,age,nickname,breed'.split(',')
+export const addUser = async (ctx: Context, next: Next) => {
+  // const query = ctx.query;
+  console.log('adduser', ctx.request.body);
+  const res = UserHelper.addUser(ctx.request.body);
+  // console.log(res);
+  await res.then(res => {
+    ctx.body = {
+      code: 0,
+      data: res,
+    };
+  },
+    err => {
+      ctx.body = {
+        code: 1,
+        errMsg: handleErr(err),
+      };
+    });
 
-//   fields.forEach(function(field) {
-//     if (body[field]) {
-//       user[field] = xss(body[field].trim())
-//     }
-//   })
+  return next;
+};
 
-//   user = await user.save()
+/**
+ * 更新用户信息操作
+ */
+export const updateUser = async (ctx: Context, next: Next) => {
+  try {
+    const info: {[key: string]: string}[] = JSON.parse(ctx.request.body.info);
+    info && info.forEach(async (record) => {
+      const user = await User.findOne({id: record.id});
+      Object.entries(record).forEach(field => {
+        if (field[0] !== 'id') {
+          user.set(field[0], field[1]);
+        }
+      });
+      await user.save();
+    });
 
-//   ctx.body = {
-//     success: true,
-//     data: {
-//       nickname: user.nickname,
-//       accessToken: user.accessToken,
-//       avatar: user.avatar,
-//       age: user.age,
-//       breed: user.breed,
-//       gender: user.gender,
-//       _id: user._id
-//     }
-//   }
-// }
+    ctx.body = {
+      code: 0,
+    };
+  } catch (e) {
+    ctx.body = {
+      code: 1,
+      errMsg: RESPONSE_TAG.ERROR + e.message,
+    };
+  }
 
-
+ return next;
+};
 
 // /**
 //  * 数据库接口测试
