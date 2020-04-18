@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const mongoose = require('mongoose')
 
-const db = 'mongodb://localhost/test'
+const db = 'mongodb://localhost/test';
 
 /**
  * mongoose连接数据库
@@ -17,7 +17,7 @@ mongoose.connect(db)
  * 获取数据库表对应的js对象所在的路径
  * @type {[type]}
  */
-const models_path = path.join(__dirname, '/app/models')
+const models_path = path.join(__dirname, '/models')
 
 
 /**
@@ -53,7 +53,9 @@ const app = new Koa()
 
 app.keys = ['zhangivon']
 app.use(logger())
-app.use(session(app))
+app.use(session({
+  maxAge: 3600000,  // session一小时过期
+}, app))
 app.use(bodyParser())
 
 
@@ -61,7 +63,7 @@ app.use(bodyParser())
  * 使用路由转发请求
  * @type {[type]}
  */
-const router = require('./config/router')()
+const router = require('../config/router')()
 
 app
   .use(router.routes())

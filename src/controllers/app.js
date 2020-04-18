@@ -11,14 +11,14 @@ exports.hasBody = async (ctx, next) => {
   // console.log(this.query.phonenumber)
   console.log(body)
 
-  if (Object.keys(body).length === 0) {
-    ctx.body = {
-      success: false,
-      err: '某参数缺失'
-    }
+  // if (Object.keys(body).length === 0) {
+  //   ctx.body = {
+  //     success: false,
+  //     err: '某参数缺失'
+  //   }
 
-    return next
-  }
+  //   return next
+  // }
 
   await next()
 }

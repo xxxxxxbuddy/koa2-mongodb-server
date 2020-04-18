@@ -4,7 +4,13 @@
   "description": "利用node+koa+mongoose搭建的后台服务，提供restful接口api",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run serve",
+    "serve": "node dist/src/app.js",
+    "build": "rm -rf dist && npm run tslint && npm run build-ts",
+    "build-ts": "tsc",
+    "watch": "npm run tslint && npm run watch-ts",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
   "keywords": [
     "koa",
@@ -30,5 +36,15 @@
     "speakeasy": "^2.0.0",
     "uuid": "^3.0.1",
     "xss": "^0.3.3"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.11.3",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.0",
+    "@types/koa2-cors": "^2.0.1",
+    "@types/mongoose": "^5.7.11",
+    "cross-env": "^7.0.2",
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3"
   }
 }

@@ -1,7 +1,17 @@
-'use strict'
+'use strict';
 
-var mongoose = require('mongoose')
-var Schema = mongoose.Schema;
+import { Next } from 'koa';
+
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+
+// export type UserField = {
+//   name: string,
+//   id: string,
+//   phone: string,
+//   sex: number,
+// }
 
 /**
  * 定义一个模式(相当于传统意义的表结构)
@@ -10,45 +20,43 @@ var Schema = mongoose.Schema;
  * 除了定义结构外，还定义文档的实例方法，静态模型方法，复合索引，中间件等
  * @type {mongoose}
  */
-var UserSchema = new Schema({
-	phoneNumber: {
+const UserSchema = new Schema({
+  name: String,
+  id: {
     unique: true,
-    type: String
+    type: String,
   },
-  areaCode: String,
-  verifyCode: String,
-  verified: {
-    type: Boolean,
-    default: false
+  sex: {
+    type: Number,
   },
+  phone: Number,
+  credit_rating: {
+    default: 80,
+    type: Number,
+  },
+  car_id: String,
   accessToken: String,
-  nickname: String,
-  gender: String,
-  breed: String,
-  age: String,
-  avatar: String,
   meta: {
     createAt: {
       type: Date,
-      dafault: Date.now()
+      dafault: Date.now(),
     },
     updateAt: {
       type: Date,
-      dafault: Date.now()
-    }
-  }
-})
+      dafault: Date.now(),
+    },
+  },
+});
 
 // Defines a pre hook for the document.
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next: Next) {
   if (this.isNew) {
-    this.meta.createAt = this.meta.updateAt = Date.now()
+    this.meta.createAt = this.meta.updateAt = Date.now();
+  } else {
+    this.meta.updateAt = Date.now();
   }
-  else {
-    this.meta.updateAt = Date.now()
-  }
-  next()
-})
+  next();
+});
 
 
 /**
@@ -57,9 +65,9 @@ UserSchema.pre('save', function(next) {
  * @type {[type]}
  */
 // 参数User 数据库中的集合名称, 不存在会创建.
-var User = mongoose.model('User', UserSchema)
+const UserModel = mongoose.model('User', UserSchema);
 
-module.exports = User
+module.exports = UserModel;
 
 /**
  * nodejs中文社区这篇帖子对mongoose的用法总结的不错：https://cnodejs.org/topic/548e54d157fd3ae46b233502
