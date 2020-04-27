@@ -7,7 +7,7 @@ const User = mongoose.model('User');
 export default class UserHelper {
 
   /**
-   * 查找所用用户
+   * 查找所有用户
    */
   static async findAllUsers() {
     const query = User.find();
@@ -27,6 +27,31 @@ export default class UserHelper {
    */
   static async addUser(data: any) {
     return await User.create(data);
+  }
+
+  /**
+   * 更新用户信息
+   */
+  static async updateUser(data: any[]) {
+    return await data.forEach(async (record: any) => {
+      const user = await User.findOne({id: record.id});
+      Object.entries(record).forEach(field => {
+        if (field[0] !== 'id') {
+          user.set(field[0], field[1]);
+        }
+      });
+      await user.save();
+    });
+  }
+
+  /**
+   * 删除用户
+   */
+  static async deleteUser(data: any[]) {
+    console.log(data);
+    return data.forEach(async record => {
+      await User.deleteOne({_id: record});
+    });
   }
 
   static handleRes(err: mongoose.NativeError, data: mongoose.Document[]) {

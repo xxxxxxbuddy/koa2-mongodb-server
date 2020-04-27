@@ -8,7 +8,6 @@ const User = mongoose.model('User');
 import UserHelper from '../dbhelper/userHelper';
 import { RESPONSE_TAG } from '../constant';
 import { handleErr } from '../utils/errorHeper';
-import { UserSchema } from '../models/user';
 
 // var userHelper = require('../dbhelper/userHelper')
 
@@ -113,13 +112,13 @@ export const addUser = async (ctx: Context, next: Next) => {
   // console.log(res);
   await res.then(res => {
     ctx.body = {
-      code: 0,
+      code: 1,
       data: res,
     };
   },
     err => {
       ctx.body = {
-        code: 1,
+        code: 0,
         errMsg: handleErr(err),
       };
     });
@@ -131,69 +130,49 @@ export const addUser = async (ctx: Context, next: Next) => {
  * 更新用户信息操作
  */
 export const updateUser = async (ctx: Context, next: Next) => {
-  try {
-    const info: {[key: string]: string}[] = JSON.parse(ctx.request.body.info);
-    info && info.forEach(async (record) => {
-      const user = await User.findOne({id: record.id});
-      Object.entries(record).forEach(field => {
-        if (field[0] !== 'id') {
-          user.set(field[0], field[1]);
-        }
-      });
-      await user.save();
+  const info: {[key: string]: string}[] = ctx.request.body.info;
+  if (info) {
+    const res = UserHelper.updateUser(info);
+    await res.then(res => {
+      ctx.body = {
+        code: 1,
+        data: res,
+      };
+    },
+    err => {
+      ctx.body = {
+        code: 0,
+        errMsg: handleErr(err),
+      };
     });
-
+  }
+  if (!ctx.body.code || ctx.body.code === 1) {
     ctx.body = {
       code: 0,
-    };
-  } catch (e) {
-    ctx.body = {
-      code: 1,
-      errMsg: RESPONSE_TAG.ERROR + e.message,
     };
   }
 
  return next;
 };
 
-// /**
-//  * 数据库接口测试
-//  * @param  {[type]}   ctx  [description]
-//  * @param  {Function} next [description]
-//  * @return {[type]}        [description]
-//  */
-// exports.users = async (ctx, next) => {
-//   var data = await userHelper.findAllUsers()
-//   // var obj = await userHelper.findByPhoneNumber({phoneNumber : '13525584568'})
-//   // console.log('obj=====================================>'+obj)
+/**
+ * 删除用户
+ */
+export const deleteUser = async (ctx: Context, next: Next) => {
+  const data: {[key: string]: string}[] = ctx.request.body;
+  const res = UserHelper.deleteUser(data);
+  await res.then(res => {
+    ctx.body = {
+      code: 1,
+      data: res,
+    };
+  },
+  err => {
+    ctx.body = {
+      code: 0,
+      errMsg: handleErr(err),
+    };
+  });
 
-//   ctx.body = {
-//     success: true,
-//     data
-//   }
-// }
-// exports.addUser = async (ctx, next) => {
-//   var user = new User({
-//       nickname: '测试用户',
-//       avatar: 'http://ip.example.com/u/xxx.png',
-//       phoneNumber: xss('13800138000'),
-//       verifyCode: '5896',
-//       accessToken: uuid.v4()
-//     })
-//   var user2 =  await userHelper.addUser(user)
-//   if(user2){
-//     ctx.body = {
-//       success: true,
-//       data : user2
-//     }
-//   }
-// }
-// exports.deleteUser = async (ctx, next) => {
-//   const phoneNumber = xss(ctx.request.body.phoneNumber.trim())
-//   console.log(phoneNumber)
-//   var data  = await userHelper.deleteUser({phoneNumber})
-//   ctx.body = {
-//     success: true,
-//     data
-//   }
-// }
+ return next;
+};

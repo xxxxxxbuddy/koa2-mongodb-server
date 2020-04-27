@@ -3,15 +3,14 @@
 import { Context, Next } from 'koa';
 import * as xss from 'xss';
 import * as mongoose from 'mongoose';
-const Carport = mongoose.model('Carport');
 const Parkinglot = mongoose.model('ParkingLot');
 // const uuid = require('uuid');
-import CarportHelper from '../dbhelper/carportHelper';
+import ParkinglotHelper from '../dbhelper/parkinglotHelper';
 import { RESPONSE_TAG } from '../constant';
 import { handleErr } from '../utils/errorHeper';
 
 /**
- * 注册新车位
+ * 注册新停车场
  * @param {Function} next          [description]
  * @yield {[type]}   [description]
  */
@@ -21,15 +20,15 @@ export const signup = async (ctx: Context, next: Next) => {
   const phone = xss(ctx.request.body.phone.trim());
   const sex = xss(ctx.request.body.sex.trim());
 
-  let carport = await Carport.findOne({
+  let parkinglot = await Parkinglot.findOne({
     id
   }).exec();
-  console.log(carport);
+  console.log(parkinglot);
 
-  if (!carport) {
+  if (!parkinglot) {
     // const accessToken = uuid.v4()
 
-    carport = new Carport({
+    parkinglot = new Parkinglot({
       name,
       id,
       phone,
@@ -37,7 +36,7 @@ export const signup = async (ctx: Context, next: Next) => {
       // accessToken,
     });
     try {
-      carport = await carport.save();
+      parkinglot = await parkinglot.save();
       ctx.body = {
         code: 1,
       };
@@ -62,37 +61,37 @@ export const signup = async (ctx: Context, next: Next) => {
 };
 
 /**
- * 获取车位信息
+ * 获取停车场信息
  *
  */
-export const getCarportInfo = async (ctx: Context, next: Next) => {
+export const getParkinglotInfo = async (ctx: Context, next: Next) => {
   const query = ctx.query;
 
   if (Object.keys(query).length === 0) {
-    // 查询所有车位信息
-    const carportInfo = await CarportHelper.findAllCarports();
-    if (typeof carportInfo === 'string') {
+    // 查询所有停车场信息
+    const parkinglotInfo = await ParkinglotHelper.findAllParkinglots();
+    if (typeof parkinglotInfo === 'string') {
       ctx.body = {
         code: 0,
-        errMsg: RESPONSE_TAG.ERROR + carportInfo,
+        errMsg: RESPONSE_TAG.ERROR + parkinglotInfo,
       };
     } else {
       ctx.body = {
         code: 1,
-        data: carportInfo,
+        data: parkinglotInfo,
       };
     }
   } else {
-    const carportInfo = await CarportHelper.searchCarports(query);
-    if (typeof carportInfo === 'string') {
+    const parkinglotInfo = await ParkinglotHelper.searchParkinglots(query);
+    if (typeof parkinglotInfo === 'string') {
       ctx.body = {
         code: 0,
-        errMsg: RESPONSE_TAG.ERROR + carportInfo,
+        errMsg: RESPONSE_TAG.ERROR + parkinglotInfo,
       };
     } else {
       ctx.body = {
         code: 1,
-        data: carportInfo,
+        data: parkinglotInfo,
       };
     }
   }
@@ -101,13 +100,13 @@ export const getCarportInfo = async (ctx: Context, next: Next) => {
 };
 
 /**
- * 获取车位信息
+ * 获取停车场信息
  *
  */
-export const addCarport = async (ctx: Context, next: Next) => {
+export const addParkinglot = async (ctx: Context, next: Next) => {
   // const query = ctx.query;
-  console.log('addcarport', ctx.request.body);
-  const res = CarportHelper.addCarport(ctx.request.body);
+  console.log('addparkinglot', ctx.request.body);
+  const res = ParkinglotHelper.addParkinglot(ctx.request.body);
   // console.log(res);
   await res.then(res => {
     ctx.body = {
@@ -126,19 +125,19 @@ export const addCarport = async (ctx: Context, next: Next) => {
 };
 
 /**
- * 更新车位信息操作
+ * 更新停车场信息操作
  */
-export const updateCarport = async (ctx: Context, next: Next) => {
+export const updateParkinglot = async (ctx: Context, next: Next) => {
   try {
-    const info: {[key: string]: string}[] = ctx.request.body.info;
+    const info: {[key: string]: string}[] = JSON.parse(ctx.request.body.info);
     info && info.forEach(async (record) => {
-      const carport = await Carport.findOne({_id: record._id});
+      const parkinglot = await Parkinglot.findOne({_id: record._id});
       Object.entries(record).forEach(field => {
         if (field[0] !== '_id') {
-          carport.set(field[0], field[1]);
+          parkinglot.set(field[0], field[1]);
         }
       });
-      await carport.save();
+      await parkinglot.save();
     });
 
     ctx.body = {
@@ -150,27 +149,6 @@ export const updateCarport = async (ctx: Context, next: Next) => {
       errMsg: RESPONSE_TAG.ERROR + e.message,
     };
   }
-
- return next;
-};
-
-/**
- * 查询停车场内车位状态
- */
-export const getParkinglotState = async (ctx: Context, next: Next) => {
-  const res = CarportHelper.getParkinglotState();
-  await res.then(r => {
-    console.log(r);
-    ctx.body = {
-      code: 1,
-      data: r,
-    };
-  }).catch(e => {
-    ctx.body = {
-      code: 1,
-        errMsg: handleErr(e),
-    };
-  });
 
  return next;
 };

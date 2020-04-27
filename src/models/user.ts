@@ -39,7 +39,7 @@ export const UserSchema = new Schema({
     default: 80,
     type: Number,
   },
-  car_id: String,
+  carport_id: String,
   meta: {
     createAt: {
       type: Date,
